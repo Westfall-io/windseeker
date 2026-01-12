@@ -112,8 +112,11 @@ You must see a `sysml` kernel. If not, install and register your SysML kernel pe
 ### 4) Run the Pipeline
 
 ```bash
-python main.py
+python cli.py run
 ```
+
+> `main.py` contains the core pipeline logic and is treated as a library module.  
+> `cli.py` is the supported entry point for end users.
 
 ### 5) Inspect Outputs
 
@@ -121,6 +124,72 @@ python main.py
 - `packages_in_dependency_order.ipynb`
 - `packages_in_dependency_order_executed.ipynb`
 - `views/*.svg`, `views/*.png`
+
+---
+
+## 🧰 CLI Usage
+
+This project exposes a Typer-based command-line interface via `cli.py`.
+
+To see all available commands and options:
+
+```bash
+python cli.py --help
+```
+
+### Run the full pipeline
+
+```bash
+python cli.py run
+```
+
+This performs:
+
+1. SysML file scanning  
+2. Dependency graph construction  
+3. Cycle and missing-import validation  
+4. Notebook generation  
+5. Notebook execution  
+6. View image extraction  
+
+---
+
+### Common CLI Examples
+
+#### Disable graph image generation
+```bash
+python cli.py run --no-graph
+```
+
+#### Specify a custom graph output
+```bash
+python cli.py run --graph --graph-png my_graph.png
+```
+
+#### Skip notebook execution (generate only)
+```bash
+python cli.py run --no-execute
+```
+
+#### Extract views with an opaque PNG background
+```bash
+python cli.py run --png-opaque --png-bg "#ffffff"
+```
+
+#### Change input folder
+```bash
+python cli.py run --folder ./models
+```
+
+---
+
+### Print dependency order only
+
+```bash
+python cli.py order
+```
+
+This prints the topological package order without generating any output artifacts.
 
 ---
 
@@ -151,6 +220,8 @@ pillow
 
 ### SysML Jupyter Kernel (Required)
 
+This project **requires a SysML kernel registered with Jupyter**.
+
 > `requirements.txt` alone is **not sufficient** — kernels must be registered separately.
 
 Typical install pattern (tool-specific):
@@ -159,6 +230,9 @@ Typical install pattern (tool-specific):
 pip install <sysml-kernel-package>
 python -m <sysml_kernel_module> install
 ```
+
+The CLI validates kernel availability at execution time; kernel installation
+cannot be handled via `requirements.txt`.
 
 ---
 
@@ -169,6 +243,19 @@ python -m <sysml_kernel_module> install
 - Imports are resolved at the top-level package granularity
 - Views are fully qualified (e.g. `System::Views::MyView`)
 - Fail early, fail clearly
+
+---
+
+## 🧠 CLI Design Notes
+
+- The CLI is implemented using **Typer** (Click-based) to provide:
+  - Strong typing
+  - Clear `--help` output
+  - Explicit boolean flags (`--flag / --no-flag`)
+- Boolean toggles are always separated from path arguments  
+  (e.g. `--graph` vs `--graph-png`)
+- All validation failures (cycles, missing packages, execution errors)
+  result in a non-zero exit code, making the tool CI-friendly
 
 ---
 

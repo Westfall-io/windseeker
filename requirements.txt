@@ -13,3 +13,5 @@ pillow>=10.0
 
 # Utilities
 lxml>=5.0
+typer>=0.12
+rich>=13.7
