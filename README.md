@@ -1,19 +1,14 @@
-# SysML v2 Dependency Analyzer, Notebook Generator, and View Extractor
+# Windseeker
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![Jupyter](https://img.shields.io/badge/jupyter-notebook-orange.svg)
 ![SysML](https://img.shields.io/badge/SysML-v2-green.svg)
+![CLI](https://img.shields.io/badge/CLI-windseeker-brightgreen.svg)
 ![Status](https://img.shields.io/badge/status-experimental-yellow.svg)
 
-This project provides a **static-analysis and execution pipeline for SysML v2 textual models**.  
-It scans `.sysml` files, analyzes package dependencies, generates a dependency-ordered SysML Jupyter notebook, executes that notebook, and extracts rendered **views** as images.
+**Windseeker** is a command-line tool for **SysML v2 dependency analysis, notebook generation, execution, and view extraction**.
 
-The toolchain is designed to support:
-- Large, multi-file SysML v2 models
-- Deterministic dependency ordering
-- Import cycle detection
-- Missing-package detection
-- Automated view rendering and image extraction
+It scans `.sysml` files, analyzes package dependencies, generates a dependency-ordered SysML Jupyter notebook, executes that notebook using a SysML kernel, and extracts rendered **views** as images.
 
 ---
 
@@ -36,6 +31,7 @@ This project has used generative AI to assist in the development of the tool.
 - Generates a **single-kernel SysML Jupyter notebook**
 - One **code cell per top-level package**
 - Cells ordered by **dependency order**
+- Nested packages remain embedded in their parent cell
 - Appends additional cells for each discovered `view`
   - Uses `%view Fully::Qualified::ViewName`
 
@@ -60,9 +56,51 @@ This project has used generative AI to assist in the development of the tool.
 
 ## 🚀 Quick Start
 
-### 1) Minimal Example Model
+### 1) Install Windseeker
 
-Create a file `tests/simple.sysml`:
+Clone the repository and install locally:
+
+```bash
+pip install -e .
+```
+
+This installs the `windseeker` CLI command.
+
+---
+
+### 2) Install Python Dependencies
+
+If you prefer manual installation:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### 3) Ensure a SysML Jupyter Kernel Is Installed
+
+Windseeker **requires a SysML kernel registered with Jupyter**.
+
+Verify:
+
+```bash
+jupyter kernelspec list
+```
+
+You must see a kernel such as:
+
+```
+sysml
+```
+
+> Kernel installation is tool-specific and cannot be handled via `requirements.txt` or `pyproject.toml`.
+
+---
+
+### 4) Minimal Example Model
+
+Create `tests/simple.sysml`:
 
 ```sysml
 package DemoSystem {
@@ -95,52 +133,12 @@ package DemoSystem {
 }
 ```
 
-### 2) Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 3) Ensure SysML Kernel Is Installed
-
-```bash
-jupyter kernelspec list
-```
-
-You must see a `sysml` kernel. If not, install and register your SysML kernel per your tool’s instructions.
-
-### 4) Run the Pipeline
-
-```bash
-python cli.py run
-```
-
-> `main.py` contains the core pipeline logic and is treated as a library module.  
-> `cli.py` is the supported entry point for end users.
-
-### 5) Inspect Outputs
-
-- `packages_in_dependency_order.sysml`
-- `packages_in_dependency_order.ipynb`
-- `packages_in_dependency_order_executed.ipynb`
-- `views/*.svg`, `views/*.png`
-
 ---
 
-## 🧰 CLI Usage
-
-This project exposes a Typer-based command-line interface via `cli.py`.
-
-To see all available commands and options:
+### 5) Run Windseeker
 
 ```bash
-python cli.py --help
-```
-
-### Run the full pipeline
-
-```bash
-python cli.py run
+windseeker run
 ```
 
 This performs:
@@ -154,31 +152,49 @@ This performs:
 
 ---
 
+## 🧰 CLI Usage
+
+### Show help
+
+```bash
+windseeker --help
+```
+
+---
+
+### Run the full pipeline
+
+```bash
+windseeker run
+```
+
+---
+
 ### Common CLI Examples
 
 #### Disable graph image generation
 ```bash
-python cli.py run --no-graph
+windseeker run --no-graph
 ```
 
 #### Specify a custom graph output
 ```bash
-python cli.py run --graph --graph-png my_graph.png
+windseeker run --graph --graph-png my_graph.png
 ```
 
 #### Skip notebook execution (generate only)
 ```bash
-python cli.py run --no-execute
+windseeker run --no-execute
 ```
 
 #### Extract views with an opaque PNG background
 ```bash
-python cli.py run --png-opaque --png-bg "#ffffff"
+windseeker run --png-opaque --png-bg "#ffffff"
 ```
 
 #### Change input folder
 ```bash
-python cli.py run --folder ./models
+windseeker run --folder ./models
 ```
 
 ---
@@ -186,7 +202,7 @@ python cli.py run --folder ./models
 ### Print dependency order only
 
 ```bash
-python cli.py order
+windseeker order
 ```
 
 This prints the topological package order without generating any output artifacts.
@@ -204,38 +220,6 @@ This prints the topological package order without generating any output artifact
 
 ---
 
-## 🛠 Requirements
-
-### Python Packages
-
-```txt
-networkx
-matplotlib
-nbformat
-nbclient
-jupyter
-cairosvg
-pillow
-```
-
-### SysML Jupyter Kernel (Required)
-
-This project **requires a SysML kernel registered with Jupyter**.
-
-> `requirements.txt` alone is **not sufficient** — kernels must be registered separately.
-
-Typical install pattern (tool-specific):
-
-```bash
-pip install <sysml-kernel-package>
-python -m <sysml_kernel_module> install
-```
-
-The CLI validates kernel availability at execution time; kernel installation
-cannot be handled via `requirements.txt`.
-
----
-
 ## 🧠 Design Principles
 
 - **Top-level packages = notebook cells**
@@ -248,7 +232,7 @@ cannot be handled via `requirements.txt`.
 
 ## 🧠 CLI Design Notes
 
-- The CLI is implemented using **Typer** (Click-based) to provide:
+- The CLI is implemented using **Typer** (Click-based) for:
   - Strong typing
   - Clear `--help` output
   - Explicit boolean flags (`--flag / --no-flag`)
@@ -279,9 +263,9 @@ cannot be handled via `requirements.txt`.
 
 ## 🧩 Extensibility
 
-This codebase is designed to be extended easily:
+Windseeker is designed to be extended easily:
 
-- CLI flags (e.g. `--no-execute`, `--views-only`)
+- Additional CLI commands
 - CI integration
 - JSON dependency reports
 - Multiple view renderers
