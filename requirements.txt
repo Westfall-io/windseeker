@@ -1,0 +1,15 @@
+# Core analysis & graphing
+networkx>=3.2
+matplotlib>=3.8
+
+# Jupyter notebook handling & execution
+nbformat>=5.9
+nbclient>=0.9
+jupyter>=1.0
+
+# View extraction & image conversion
+cairosvg>=2.7
+pillow>=10.0
+
+# Utilities
+lxml>=5.0
