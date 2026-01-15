@@ -47,7 +47,8 @@ other_allowed_tags = [":memo:", ":white_check_mark:", ":art:", ":wrench:", ":pac
 dev = [
   "ruff>=0.6",
   "pytest>=8",
-  "python-semantic-release>=9"
+  "python-semantic-release>=9",
+  "pre-commit>=3.7"
 ]
 
 [tool.ruff]

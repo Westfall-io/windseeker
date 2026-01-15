@@ -16,7 +16,7 @@ package Riolu {
         part e : Elastic;
         part vue_app : Vue;
 
-        
+
     }
 
 }

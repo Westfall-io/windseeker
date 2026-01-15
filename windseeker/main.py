@@ -4,22 +4,23 @@ import re
 import uuid
 import json
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
 import networkx as nx
-from collections import defaultdict
 import matplotlib.pyplot as plt
 import shutil
 import subprocess
 import nbformat
 import base64
 import io
-import nbformat
+
 
 class ImportCycleError(RuntimeError):
     """Raised when the import graph contains one or more cycles."""
 
+
 class MissingPackageError(RuntimeError):
     """Raised when an import references a package we did not find/parse."""
+
 
 # Matches lines that are NOT "line-commented out" at the start (allowing leading whitespace)
 # and contain a whole-word 'import' or 'package', capturing the following token.
@@ -89,12 +90,12 @@ INNER_PACKAGE_OPEN_RE = re.compile(
 )
 
 
-
 ERROR_PATTERNS = [
     re.compile(r"\bERROR\b", re.IGNORECASE),
     re.compile(r"\bException\b", re.IGNORECASE),
     re.compile(r"\bTraceback\b", re.IGNORECASE),
 ]
+
 
 def _safe_filename(name: str) -> str:
     """
@@ -137,13 +138,11 @@ def extract_view_images_from_executed_notebook(
 
     # Optional converters
     try:
-        import cairosvg  # type: ignore
         _has_cairosvg = True
     except Exception:
         _has_cairosvg = False
 
     try:
-        from PIL import Image  # type: ignore
         _has_pil = True
     except Exception:
         _has_pil = False
@@ -158,20 +157,27 @@ def extract_view_images_from_executed_notebook(
 
         if write_png:
             if not _has_cairosvg:
-                raise RuntimeError("cairosvg is required to render SVG to PNG, but it is not installed.")
+                raise RuntimeError(
+                    "cairosvg is required to render SVG to PNG, but it is not installed."
+                )
             png_file = out_path / f"{base}.png"
             # cairosvg accepts bytestring
             import cairosvg  # type: ignore
+
             cairosvg.svg2png(
-                bytestring=svg_text.encode("utf-8"), 
+                bytestring=svg_text.encode("utf-8"),
                 write_to=str(png_file),
-                background_color="#ffffff")
+                background_color="#ffffff",
+            )
             written.append(str(png_file))
 
             if write_jpg:
                 if not _has_pil:
-                    raise RuntimeError("Pillow (PIL) is required to convert PNG to JPG, but it is not installed.")
+                    raise RuntimeError(
+                        "Pillow (PIL) is required to convert PNG to JPG, but it is not installed."
+                    )
                 from PIL import Image  # type: ignore
+
                 jpg_file = out_path / f"{base}.jpg"
                 with Image.open(png_file) as im:
                     im = im.convert("RGB")
@@ -186,8 +192,11 @@ def extract_view_images_from_executed_notebook(
 
         if write_jpg:
             if not _has_pil:
-                raise RuntimeError("Pillow (PIL) is required to convert PNG to JPG, but it is not installed.")
+                raise RuntimeError(
+                    "Pillow (PIL) is required to convert PNG to JPG, but it is not installed."
+                )
             from PIL import Image  # type: ignore
+
             jpg_file = out_path / f"{base}.jpg"
             with Image.open(io.BytesIO(png_bytes)) as im:
                 im = im.convert("RGB")
@@ -198,7 +207,11 @@ def extract_view_images_from_executed_notebook(
         if cell.get("cell_type") != "code":
             continue
 
-        src = "".join(cell.get("source", "")) if isinstance(cell.get("source", ""), list) else cell.get("source", "")
+        src = (
+            "".join(cell.get("source", ""))
+            if isinstance(cell.get("source", ""), list)
+            else cell.get("source", "")
+        )
         src_stripped = src.lstrip()
 
         if not src_stripped.startswith("%view"):
@@ -252,11 +265,13 @@ def extract_view_images_from_executed_notebook(
 
     return written
 
+
 def _top_level_of_qualified_name(name: str) -> str:
     """
     If name is 'A::B::C', return 'A'. Otherwise return name.
     """
     return name.split("::", 1)[0]
+
 
 def _brace_depth_prefix(text: str) -> List[int]:
     """
@@ -274,6 +289,7 @@ def _brace_depth_prefix(text: str) -> List[int]:
             d = max(0, d - 1)
     depth[len(text)] = d
     return depth
+
 
 def collect_views_from_package_text(package_name: str, package_full_text: str) -> List[str]:
     """
@@ -338,6 +354,7 @@ def collect_all_views(package_text: Dict[str, str]) -> List[str]:
             ordered.append(v)
     return ordered
 
+
 def collect_notebook_issues(nb) -> list[dict]:
     """
     Collect issues from a notebook execution.
@@ -357,24 +374,28 @@ def collect_notebook_issues(nb) -> list[dict]:
 
             # Standard Jupyter errors
             if ot == "error":
-                issues.append({
-                    "cell_index": idx,
-                    "type": "error_output",
-                    "ename": out.get("ename", ""),
-                    "evalue": out.get("evalue", ""),
-                    "traceback": out.get("traceback", []),
-                })
+                issues.append(
+                    {
+                        "cell_index": idx,
+                        "type": "error_output",
+                        "ename": out.get("ename", ""),
+                        "evalue": out.get("evalue", ""),
+                        "traceback": out.get("traceback", []),
+                    }
+                )
                 continue
 
             # SysML kernel errors often appear on stderr as streams
             if ot == "stream" and out.get("name") == "stderr":
                 text = out.get("text", "") or ""
                 if any(p.search(text) for p in ERROR_PATTERNS):
-                    issues.append({
-                        "cell_index": idx,
-                        "type": "stderr",
-                        "text": text,
-                    })
+                    issues.append(
+                        {
+                            "cell_index": idx,
+                            "type": "stderr",
+                            "text": text,
+                        }
+                    )
 
     return issues
 
@@ -416,12 +437,9 @@ def execute_notebook(
     # --- Try nbclient (best, no subprocess) ---
     try:
         from nbclient import NotebookClient  # type: ignore
+
         nb = nbformat.read(in_path, as_version=4)
-        kernel_name = (
-            nb.get("metadata", {})
-            .get("kernelspec", {})
-            .get("name")
-        ) or "sysml"
+        kernel_name = (nb.get("metadata", {}).get("kernelspec", {}).get("name")) or "sysml"
 
         client = NotebookClient(nb, timeout=timeout_sec, kernel_name=kernel_name)
         client.execute()
@@ -443,12 +461,16 @@ def execute_notebook(
         )
 
     cmd = [
-        "jupyter", "nbconvert",
-        "--to", "notebook",
+        "jupyter",
+        "nbconvert",
+        "--to",
+        "notebook",
         "--execute",
         "--ExecutePreprocessor.timeout={}".format(timeout_sec),
-        "--output", str(Path(out_path).name),
-        "--output-dir", str(Path(out_path).parent),
+        "--output",
+        str(Path(out_path).name),
+        "--output-dir",
+        str(Path(out_path).parent),
         str(in_path),
     ]
     proc = subprocess.run(cmd, capture_output=True, text=True)
@@ -473,12 +495,13 @@ def execute_and_fail_on_notebook_errors(
 
     print(f"Notebook executed cleanly: {executed_out_path}")
 
+
 def write_notebook_in_dependency_order(
     G: nx.DiGraph,
     package_text: Dict[str, str],
     *,
     views: List[str] | None = None,
-    out_path: str = "packages_in_dependency_order.ipynb"
+    out_path: str = "packages_in_dependency_order.ipynb",
 ) -> None:
     """
     Write a Jupyter notebook where the entire notebook uses the SysML kernel.
@@ -490,47 +513,49 @@ def write_notebook_in_dependency_order(
     cells = []
     for pkg in order:
         body = package_text[pkg].rstrip() + "\n"
-        cells.append({
-            "cell_type": "code",
-            "execution_count": None,
-            "id": uuid.uuid4().hex,
-            "metadata": {},          # matches the single-kernel example style
-            "outputs": [],
-            "source": body.splitlines(True)  # list[str] with newlines preserved
-        })
+        cells.append(
+            {
+                "cell_type": "code",
+                "execution_count": None,
+                "id": uuid.uuid4().hex,
+                "metadata": {},  # matches the single-kernel example style
+                "outputs": [],
+                "source": body.splitlines(True),  # list[str] with newlines preserved
+            }
+        )
 
     # After package cells, append view rendering cells
     views = views or []
     for v in views:
         # Title cell (so the notebook visually labels each view)
         title = f"# {v}After\n"
-        cells.append({
-            "cell_type": "markdown",
-            "execution_count": None,
-            "id": uuid.uuid4().hex,
-            "metadata": {},
-            "outputs": [],
-            "source": [title],
-        })
+        cells.append(
+            {
+                "cell_type": "markdown",
+                "execution_count": None,
+                "id": uuid.uuid4().hex,
+                "metadata": {},
+                "outputs": [],
+                "source": [title],
+            }
+        )
 
         # SysML magic cell to generate the view image
-        cells.append({
-            "cell_type": "code",
-            "execution_count": None,
-            "id": uuid.uuid4().hex,
-            "metadata": {},
-            "outputs": [],
-            "source": [f"%view {v}\n"],
-        })
+        cells.append(
+            {
+                "cell_type": "code",
+                "execution_count": None,
+                "id": uuid.uuid4().hex,
+                "metadata": {},
+                "outputs": [],
+                "source": [f"%view {v}\n"],
+            }
+        )
 
     nb = {
         "cells": cells,
         "metadata": {
-            "kernelspec": {
-                "display_name": "SysML",
-                "language": "sysml",
-                "name": "sysml"
-            },
+            "kernelspec": {"display_name": "SysML", "language": "sysml", "name": "sysml"},
             "language_info": {
                 # Mirrors the typical SysML notebook metadata (as in your example)
                 "codemirror_mode": "sysml",
@@ -538,14 +563,15 @@ def write_notebook_in_dependency_order(
                 "mimetype": "text/x-sysml",
                 "name": "SysML",
                 "pygments_lexer": "java",
-                "version": "1.0.0"
-            }
+                "version": "1.0.0",
+            },
         },
         "nbformat": 4,
-        "nbformat_minor": 5
+        "nbformat_minor": 5,
     }
 
     Path(out_path).write_text(json.dumps(nb, indent=2), encoding="utf-8")
+
 
 def assert_no_unresolved_imports_or_raise(G: nx.DiGraph, *, ignore: set[str] | None = None) -> None:
     ignore = ignore or set()
@@ -562,7 +588,8 @@ def assert_no_unresolved_imports_or_raise(G: nx.DiGraph, *, ignore: set[str] | N
         importers = ", ".join(sorted(filtered[imported_pkg]))
         lines.append(f"  - {imported_pkg}  (imported by: {importers})")
 
-    #raise MissingPackageError("\n".join(lines))
+    # raise MissingPackageError("\n".join(lines))
+
 
 def _find_matching_brace(text: str, open_brace_index: int) -> int:
     """Return index of matching '}' for the '{' at open_brace_index, or -1 if not found."""
@@ -579,6 +606,7 @@ def _find_matching_brace(text: str, open_brace_index: int) -> int:
                 return i
         i += 1
     return -1
+
 
 def extract_packages_with_text(text: str) -> list[tuple[str, str]]:
     """
@@ -610,12 +638,12 @@ def extract_packages_with_text(text: str) -> list[tuple[str, str]]:
             end = j + 1
             while end < n and text[end] != "\n":
                 end += 1
-            results.append((name, text[m.start():end]))
+            results.append((name, text[m.start() : end]))
 
         elif text[j] == "{":
             close = _find_matching_brace(text, j)
             if close == -1:
-                results.append((name, text[m.start():]))
+                results.append((name, text[m.start() :]))
                 continue
             end = close + 1
 
@@ -626,15 +654,16 @@ def extract_packages_with_text(text: str) -> list[tuple[str, str]]:
             if k < n and text[k] == ";":
                 end = k + 1
 
-            results.append((name, text[m.start():end]))
+            results.append((name, text[m.start() : end]))
 
         else:
             end = j
             while end < n and text[end] != "\n":
                 end += 1
-            results.append((name, text[m.start():end]))
+            results.append((name, text[m.start() : end]))
 
     return results
+
 
 def topological_packages(G: nx.DiGraph, *, dependencies_first: bool = True) -> List[str]:
     """
@@ -650,11 +679,9 @@ def topological_packages(G: nx.DiGraph, *, dependencies_first: bool = True) -> L
     H = G.reverse(copy=False) if dependencies_first else G
     return list(nx.topological_sort(H))
 
+
 def output_package_text_in_dependency_order(
-    G: nx.DiGraph,
-    package_text: Dict[str, str],
-    *,
-    out_path: str | None = None
+    G: nx.DiGraph, package_text: Dict[str, str], *, out_path: str | None = None
 ) -> None:
     """
     Print/write each package's full text in dependency order (dependencies first).
@@ -677,6 +704,7 @@ def output_package_text_in_dependency_order(
         Path(out_path).write_text(output, encoding="utf-8")
     else:
         print(output)
+
 
 def build_import_graph_from_package_text(package_text: Dict[str, str]) -> nx.DiGraph:
     G = nx.DiGraph()
@@ -710,6 +738,7 @@ def build_import_graph_from_package_text(package_text: Dict[str, str]) -> nx.DiG
     G.graph["unresolved_imports"] = unresolved
     return G
 
+
 def _normalize_qualified_name(name: str) -> str:
     """
     Normalize captured names:
@@ -717,6 +746,7 @@ def _normalize_qualified_name(name: str) -> str:
     - remove a trailing '::' (common in patterns like A::*)
     """
     return re.sub(r"::\s*$", "", name)
+
 
 def _strip_quotes_if_needed(token: str) -> str:
     """Remove surrounding single quotes if token is a single-quoted string; keep content as-is."""
@@ -750,11 +780,12 @@ def scan_folder(root_folder="./tests") -> Dict[str, str]:
         for pkg_name, pkg_full_text in extract_packages_with_text(clean_text):
             package_text.setdefault(pkg_name, pkg_full_text)
 
-
     return package_text
+
 
 def find_cycles(G):
     return list(nx.simple_cycles(G))
+
 
 def _format_cycles(cycles: list[list[str]], max_show: int = 25) -> str:
     """
@@ -793,7 +824,7 @@ def visualize_graph_to_file(
     title: str | None = "SysML Package Import Graph",
     figsize: tuple[float, float] = (16, 10),
     dpi: int = 200,
-    layout: str = "spring",   # "spring" | "kamada_kawai" | "shell"
+    layout: str = "spring",  # "spring" | "kamada_kawai" | "shell"
     seed: int = 42,
 ) -> None:
     """
@@ -829,6 +860,7 @@ def visualize_graph_to_file(
     plt.savefig(out_path, dpi=dpi)
     plt.close()
 
+
 def main(folder="./tests"):
     package_text = scan_folder(folder)
     G = build_import_graph_from_package_text(package_text)
@@ -859,16 +891,15 @@ def main(folder="./tests"):
     print("*" * 20)
 
     # Output full package text in dependency order
-    output_package_text_in_dependency_order(G, package_text, out_path="packages_in_dependency_order.sysml")
+    output_package_text_in_dependency_order(
+        G, package_text, out_path="packages_in_dependency_order.sysml"
+    )
     print("Wrote packages_in_dependency_order.sysml")
     print("*" * 20)
 
     # Output notebook with one cell per package in dependency order
     write_notebook_in_dependency_order(
-        G,
-        package_text,
-        views=views,
-        out_path="packages_in_dependency_order.ipynb"
+        G, package_text, views=views, out_path="packages_in_dependency_order.ipynb"
     )
     print("Wrote packages_in_dependency_order.ipynb")
     execute_and_fail_on_notebook_errors(
@@ -888,5 +919,6 @@ def main(folder="./tests"):
 
     return G
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     G = main()

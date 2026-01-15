@@ -6,7 +6,7 @@ package Flashlight_StarterModel {
      * It is anticipated that a user will review and modify this model in their modeling environment.
      * As an example, a modification could include updating the flashlight requirments and design to add a flashing state.
      *
-     * Refer to the following URL for instructional material on SysML v2 textual and graphical syntax: 
+     * Refer to the following URL for instructional material on SysML v2 textual and graphical syntax:
      * https://github.com/Systems-Modeling/SysML-v2-Release/tree/master/doc
      *
      * /* Updates
@@ -18,12 +18,12 @@ package Flashlight_StarterModel {
      * - Modified package structure
      * - Added simple definition and usage example under General Concepts package
      * 2025-05-09 Added context package for class exercise
-     * 2025-07-21 Added ISQ to poweer in calc, updated views, added first to state transition 
+     * 2025-07-21 Added ISQ to poweer in calc, updated views, added first to state transition
      */
     private import ScalarValues::*;
     private import SI::*;
     private import USCustomaryUnits::*;
-    
+
     private import Definitions::*;
     package Definitions{
         item def OnOffCmd;

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 import typer
 
 # Import the functions you already have in main.py
@@ -25,26 +24,52 @@ app = typer.Typer(add_completion=True, help="SysML v2 dependency + notebook + vi
 
 @app.command("run")
 def run(
-    folder: Path = typer.Option(Path("./tests"), "--folder", "-f", exists=True, file_okay=False, dir_okay=True),
+    folder: Path = typer.Option(
+        Path("./tests"), "--folder", "-f", exists=True, file_okay=False, dir_okay=True
+    ),
     write_graph: bool = typer.Option(True, "--graph/--no-graph", help="Write graph image"),
-    graph_png: Path = typer.Option(Path("imports.png"), "--graph-png", help="Graph image output path"),
-    graph_layout: str = typer.Option("kamada_kawai", "--graph-layout", help="spring|kamada_kawai|shell"),
-    sysml_out: Path = typer.Option(Path("packages_in_dependency_order.sysml"), "--sysml-out", help="Output .sysml file"),
-    notebook_out: Path = typer.Option(Path("packages_in_dependency_order.ipynb"), "--notebook-out", help="Output notebook"),
-    execute: bool = typer.Option(True, "--execute/--no-execute", help="Execute the generated notebook"),
+    graph_png: Path = typer.Option(
+        Path("imports.png"), "--graph-png", help="Graph image output path"
+    ),
+    graph_layout: str = typer.Option(
+        "kamada_kawai", "--graph-layout", help="spring|kamada_kawai|shell"
+    ),
+    sysml_out: Path = typer.Option(
+        Path("packages_in_dependency_order.sysml"), "--sysml-out", help="Output .sysml file"
+    ),
+    notebook_out: Path = typer.Option(
+        Path("packages_in_dependency_order.ipynb"), "--notebook-out", help="Output notebook"
+    ),
+    execute: bool = typer.Option(
+        True, "--execute/--no-execute", help="Execute the generated notebook"
+    ),
     executed_notebook_out: Path = typer.Option(
         Path("packages_in_dependency_order_executed.ipynb"),
         "--executed-notebook-out",
         help="Executed notebook path",
     ),
-    export_views: bool = typer.Option(True, "--export-views/--no-export-views", help="Extract rendered views as images"),
-    views_dir: Path = typer.Option(Path("views"), "--views-dir", help="Directory to write view images"),
-    write_svg: bool = typer.Option(True, "--write-svg/--no-write-svg", help="Write raw SVG XML files"),
+    export_views: bool = typer.Option(
+        True, "--export-views/--no-export-views", help="Extract rendered views as images"
+    ),
+    views_dir: Path = typer.Option(
+        Path("views"), "--views-dir", help="Directory to write view images"
+    ),
+    write_svg: bool = typer.Option(
+        True, "--write-svg/--no-write-svg", help="Write raw SVG XML files"
+    ),
     write_png: bool = typer.Option(True, "--write-png/--no-write-png", help="Write PNG files"),
-    write_jpg: bool = typer.Option(False, "--write-jpg/--no-write-jpg", help="Also write JPG files"),
-    png_transparent: bool = typer.Option(True, "--png-transparent/--png-opaque", help="PNG background transparency"),
-    png_bg: str = typer.Option("#ffffff", "--png-bg", help="PNG background color if opaque (e.g. #ffffff)"),
-    ignore_missing: list[str] = typer.Option(["<root>"], "--ignore-missing", help="Imported packages to ignore as missing"),
+    write_jpg: bool = typer.Option(
+        False, "--write-jpg/--no-write-jpg", help="Also write JPG files"
+    ),
+    png_transparent: bool = typer.Option(
+        True, "--png-transparent/--png-opaque", help="PNG background transparency"
+    ),
+    png_bg: str = typer.Option(
+        "#ffffff", "--png-bg", help="PNG background color if opaque (e.g. #ffffff)"
+    ),
+    ignore_missing: list[str] = typer.Option(
+        ["<root>"], "--ignore-missing", help="Imported packages to ignore as missing"
+    ),
 ):
     """
     End-to-end pipeline:
@@ -80,7 +105,9 @@ def run(
 
     # Execute notebook
     if execute:
-        execute_and_fail_on_notebook_errors(str(notebook_out), executed_out_path=str(executed_notebook_out))
+        execute_and_fail_on_notebook_errors(
+            str(notebook_out), executed_out_path=str(executed_notebook_out)
+        )
         typer.echo(f"Executed notebook: {executed_notebook_out}")
 
         # Extract views from executed notebook
@@ -101,7 +128,9 @@ def run(
 
 @app.command("order")
 def order(
-    folder: Path = typer.Option(Path("./tests"), "--folder", "-f", exists=True, file_okay=False, dir_okay=True),
+    folder: Path = typer.Option(
+        Path("./tests"), "--folder", "-f", exists=True, file_okay=False, dir_okay=True
+    ),
     dependencies_first: bool = typer.Option(True, "--deps-first/--importers-first"),
 ):
     """Print the topological package order."""

@@ -143,12 +143,12 @@ windseeker run
 
 This performs:
 
-1. SysML file scanning  
-2. Dependency graph construction  
-3. Cycle and missing-import validation  
-4. Notebook generation  
-5. Notebook execution  
-6. View image extraction  
+1. SysML file scanning
+2. Dependency graph construction
+3. Cycle and missing-import validation
+4. Notebook generation
+5. Notebook execution
+6. View image extraction
 
 ---
 
@@ -236,7 +236,7 @@ This prints the topological package order without generating any output artifact
   - Strong typing
   - Clear `--help` output
   - Explicit boolean flags (`--flag / --no-flag`)
-- Boolean toggles are always separated from path arguments  
+- Boolean toggles are always separated from path arguments
   (e.g. `--graph` vs `--graph-png`)
 - All validation failures (cycles, missing packages, execution errors)
   result in a non-zero exit code, making the tool CI-friendly
@@ -276,5 +276,13 @@ Windseeker is designed to be extended easily:
 
 ## 📜 License
 
-This project is intended as a **tooling and analysis aid** for SysML v2 models.  
+This project is intended as a **tooling and analysis aid** for SysML v2 models.
 No official affiliation with OMG or any SysML v2 tool vendor is implied.
+
+## Development setup (recommended)
+
+Install dev dependencies and enable pre-commit hooks:
+
+```bash
+pip install -e ".[dev]"
+pre-commit install
