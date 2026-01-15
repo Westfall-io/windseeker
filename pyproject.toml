@@ -31,3 +31,27 @@ windseeker = "cli:main"
 
 [tool.setuptools]
 py-modules = ["main", "cli"]
+
+[tool.semantic_release]
+branch = "main"
+commit_parser = "emoji"
+
+[tool.semantic_release.commit_parser_options]
+major_tags = [":boom:"]
+minor_tags = [":sparkles:"]
+patch_tags = [":bug:", ":ambulance:"]
+# optional: allow other tags but don't bump:
+other_allowed_tags = [":memo:", ":white_check_mark:", ":art:", ":wrench:", ":package:"]
+
+[project.optional-dependencies]
+dev = [
+  "ruff>=0.6",
+  "pytest>=8",
+  "python-semantic-release>=9"
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+quote-style = "double"
