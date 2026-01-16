@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.2 (2026-01-16)
+
+### :bug:
+
+- :bug: ensure missing imports raise error during validation step
+  ([`575b2d2`](https://github.com/Westfall-io/windseeker/commit/575b2d27083579c90eeefd49c4d35ebae45014e4))
+
+
 ## v1.1.1 (2026-01-16)
 
 ### :bug:
