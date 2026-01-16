@@ -36,6 +36,14 @@ dev = [
   "pytest-cov>=5.0",
   "coverage[toml]>=7.6",
   "interrogate>=1.7",
+  "py>=1.11.1"
+]
+
+notebook = [
+  "nbformat>=5.9",
+  "nbclient>=0.9",
+  "jupyter>=1.0",
+  "nbconvert>=7.16.7",  # bump to newest you can
 ]
 
 [tool.coverage.run]
