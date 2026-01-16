@@ -1,21 +1,23 @@
-name: Release (gitmoji semantic versioning)
+name: Release
 
 on:
-  push:
-    branches: [main]
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
 
 permissions:
   contents: write
-  pull-requests: write
-  issues: write
 
 jobs:
   release:
+    name: Semantic Release + Build
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
-    concurrency: release
 
     steps:
-      - name: Checkout (full history required)
+      - name: Checkout (full history for tags)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -26,16 +28,36 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - name: Install semantic-release
+      - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install python-semantic-release
+          pip install -e ".[dev]"
+          pip install build
 
-      - name: Run semantic release
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # 1) Determine next version + update pyproject.toml + CHANGELOG.md
+      # 2) Commit those changes + create the tag
+      - name: Semantic Release (version)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config user.name "github-actions"
-          git config user.email "action@github.com"
-          semantic-release version
-          semantic-release publish
+        run: semantic-release version
+
+      # Build AFTER version bump so the dist uses the new version
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Upload dist artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*
+
+      # Create GitHub release / upload release notes, etc.
+      - name: Semantic Release (publish)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: semantic-release publish
