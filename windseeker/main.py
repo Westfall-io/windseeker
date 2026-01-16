@@ -34,10 +34,10 @@ class MissingPackageError(RuntimeError):
 IMPORT_RE = re.compile(
     r"""
     ^(?!\s*//)                 # line must NOT start with optional whitespace then //
-    \s*(?:\w+\s+)*             # optional modifiers like 'private'
-    \bimport\b                 # whole word 'import'
+    .*?                        # allow anything before 'import' (e.g., "package A {")
+    \bimport\b                 # whole word 'import' (won't match 'important')
     \s+                        # at least one space
-    (                           # capture the target
+    (                          # capture the target
         '(?:[^'\\]|\\.)*'      # single-quoted string
         |
         [A-Za-z_][\w.:/-]*     # bare token (e.g. B::)
