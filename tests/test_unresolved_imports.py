@@ -1,4 +1,5 @@
 import pytest
+
 from windseeker.main import (
     build_import_graph_from_package_text,
     assert_no_unresolved_imports_or_raise,
