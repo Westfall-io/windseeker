@@ -35,6 +35,7 @@ py-modules = ["main", "cli"]
 [tool.semantic_release]
 branch = "main"
 commit_parser = "emoji"
+changelog_file = "CHANGELOG.md"
 
 [tool.semantic_release.commit_parser_options]
 major_tags = [":boom:"]
