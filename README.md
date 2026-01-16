@@ -1,13 +1,13 @@
 # Windseeker
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![Jupyter](https://img.shields.io/badge/jupyter-notebook-orange.svg)
 ![SysML](https://img.shields.io/badge/SysML-v2-green.svg)
 ![CLI](https://img.shields.io/badge/CLI-windseeker-brightgreen.svg)
 ![Status](https://img.shields.io/badge/status-experimental-yellow.svg)
 ![PyPI](https://img.shields.io/pypi/v/sysml-windseeker.svg)
 ![Coverage](https://img.shields.io/codecov/c/github/Westfall-io/windseeker)
 ![Docstrings](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Westfall-io/windseeker/gh-pages/docstring-coverage.json)
+![Security Audit](https://github.com/Westfall-io/windseeker/actions/workflows/security-audit.yml/badge.svg)
 
 **Windseeker** is a command-line tool for **SysML v2 dependency analysis, notebook generation, execution, and view extraction**.
 
