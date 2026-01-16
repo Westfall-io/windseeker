@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.3 (2026-01-16)
+
+### :bug:
+
+- :bug: fix unresolved import detection and validation logic
+  ([`acd7810`](https://github.com/Westfall-io/windseeker/commit/acd781037b2568ac6c286446a12e1998536bfd4c))
+
+
 ## v1.1.2 (2026-01-16)
 
 ### :bug:
