@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68.0"]
+requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,6 +9,7 @@ description = "SysML v2 dependency analysis, notebook generation, execution, and
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
+
 authors = [
   { name = "Windseeker Contributors" }
 ]
@@ -23,37 +24,61 @@ dependencies = [
   "pillow>=10.0",
   "typer>=0.12",
   "rich>=13.7",
-  "lxml>=5.0"
+  "lxml>=5.0",
 ]
-
-[project.scripts]
-windseeker = "cli:main"
-
-[tool.setuptools]
-py-modules = ["main", "cli"]
-
-[tool.semantic_release]
-branch = "main"
-commit_parser = "emoji"
-changelog_file = "CHANGELOG.md"
-
-[tool.semantic_release.commit_parser_options]
-major_tags = [":boom:"]
-minor_tags = [":sparkles:"]
-patch_tags = [":bug:", ":ambulance:"]
-# optional: allow other tags but don't bump:
-other_allowed_tags = [":memo:", ":white_check_mark:", ":art:", ":wrench:", ":package:"]
 
 [project.optional-dependencies]
 dev = [
   "ruff>=0.6",
   "pytest>=8",
-  "python-semantic-release>=9",
-  "pre-commit>=3.7"
+  "python-semantic-release>=10.0.0",
+  "pre-commit>=3.7",
 ]
 
+[project.scripts]
+windseeker = "windseeker.cli:main"
+
+# -------------------------
+# setuptools package config
+# -------------------------
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["windseeker*"]
+
+# -------------------------
+# ruff (format + lint)
+# -------------------------
 [tool.ruff]
 line-length = 100
 
 [tool.ruff.format]
 quote-style = "double"
+
+# -------------------------
+# Python Semantic Release
+# -------------------------
+[tool.semantic_release]
+allow_zero_version = true
+version_toml = ["pyproject.toml:project.version"]
+changelog_file = "CHANGELOG.md"
+assets = ["pyproject.toml", "CHANGELOG.md"]
+commit_parser = "emoji"
+
+[tool.semantic_release.branches.main]
+match = "main"
+prerelease = false
+
+[tool.semantic_release.commit_parser_options]
+major_tags = [":boom:"]
+minor_tags = [":sparkles:"]
+patch_tags = [":bug:", ":ambulance:"]
+other_allowed_tags = [
+  ":memo:",
+  ":white_check_mark:",
+  ":art:",
+  ":wrench:",
+  ":package:"
+]
