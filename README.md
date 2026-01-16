@@ -6,6 +6,7 @@
 ![CLI](https://img.shields.io/badge/CLI-windseeker-brightgreen.svg)
 ![Status](https://img.shields.io/badge/status-experimental-yellow.svg)
 ![PyPI](https://img.shields.io/pypi/v/sysml-windseeker.svg)
+![Coverage](https://img.shields.io/codecov/c/github/Westfall-io/windseeker)
 
 **Windseeker** is a command-line tool for **SysML v2 dependency analysis, notebook generation, execution, and view extraction**.
 

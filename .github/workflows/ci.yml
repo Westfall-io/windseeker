@@ -34,5 +34,18 @@ jobs:
       - name: Ruff lint
         run: ruff check .
 
-      - name: Pytest
-        run: pytest -q
+      - name: Run tests (with coverage)
+        run: |
+          pip install -e ".[dev]"
+          pytest
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage.xml
+          fail_ci_if_error: true
+
+      - name: Docstring coverage (interrogate)
+        run: |
+          pip install -e ".[dev]"
+          interrogate -v windseeker --fail-under 50
