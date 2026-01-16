@@ -8,6 +8,7 @@ on:
       - "pyproject.toml"
       - "tests/**"
       - ".github/workflows/**"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -31,60 +32,35 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Compute docstring coverage
+      - name: Compute docstring coverage (interrogate)
         id: cov
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
 
           OUTPUT="$(interrogate -q windseeker || true)"
           echo "$OUTPUT"
 
-          PCT=$(echo "$OUTPUT" | python -c "
-import sys, re
-text = sys.stdin.read()
-m = re.search(r'(\\d+(?:\\.\\d+)?)%', text)
-print(m.group(1) if m else '0')
-")
-
+          PCT="$(echo "$OUTPUT" | python -c "import sys,re; t=sys.stdin.read(); m=re.search(r'(\d+(?:\.\d+)?)%', t); print(m.group(1) if m else '0')")"
           echo "pct=$PCT" >> "$GITHUB_OUTPUT"
 
-      - name: Build badge JSON
-        run: |
-          python - <<'PY'
-import json, os
-
-pct = float(os.environ["PCT"])
-
-def color(p):
-    if p >= 90: return "brightgreen"
-    if p >= 80: return "green"
-    if p >= 70: return "yellowgreen"
-    if p >= 60: return "yellow"
-    if p >= 50: return "orange"
-    return "red"
-
-data = {
-    "schemaVersion": 1,
-    "label": "docstrings",
-    "message": f"{pct:.1f}%",
-    "color": color(pct),
-}
-
-with open("docstring-coverage.json", "w", encoding="utf-8") as f:
-    json.dump(data, f)
-PY
+      - name: Write badge JSON
+        shell: bash
         env:
           PCT: ${{ steps.cov.outputs.pct }}
-
-      - name: Publish badge to gh-pages
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          set -euo pipefail
+          mkdir -p badge
+          python -c "import json,os; pct=float(os.environ.get('PCT','0')); \
+          color=('brightgreen' if pct>=90 else 'green' if pct>=80 else 'yellowgreen' if pct>=70 else 'yellow' if pct>=60 else 'orange' if pct>=50 else 'red'); \
+          data={'schemaVersion':1,'label':'docstrings','message':f'{pct:.1f}%','color':color}; \
+          open('badge/docstring-coverage.json','w',encoding='utf-8').write(json.dumps(data))"
 
-          git checkout --orphan gh-pages
-          git rm -rf .
-
-          mv docstring-coverage.json docstring-coverage.json
-          git add docstring-coverage.json
-          git commit -m "Update docstring coverage badge"
-          git push -f origin gh-pages
+      - name: Deploy badge JSON to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: badge
+          destination_dir: .
+          keep_files: true

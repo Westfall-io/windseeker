@@ -52,10 +52,6 @@ omit = [
 [tool.coverage.xml]
 output = "coverage.xml"
 
-[tool.pytest.ini_options]
-addopts = "-q --cov=windseeker --cov-report=term-missing --cov-report=xml"
-testpaths = ["tests"]
-
 [project.scripts]
 windseeker = "windseeker.cli:main"
 
