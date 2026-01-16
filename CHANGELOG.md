@@ -2,7 +2,7 @@
 
 <!-- version list -->
 
-## v1.1.3 (2026-01-16)
+## v0.1.3 (2026-01-16)
 
 ### :bug:
 
@@ -10,7 +10,7 @@
   ([`acd7810`](https://github.com/Westfall-io/windseeker/commit/acd781037b2568ac6c286446a12e1998536bfd4c))
 
 
-## v1.1.2 (2026-01-16)
+## v0.1.2 (2026-01-16)
 
 ### :bug:
 
@@ -18,7 +18,7 @@
   ([`575b2d2`](https://github.com/Westfall-io/windseeker/commit/575b2d27083579c90eeefd49c4d35ebae45014e4))
 
 
-## v1.1.1 (2026-01-16)
+## v0.1.1 (2026-01-16)
 
 ### :bug:
 
