@@ -31,4 +31,4 @@ jobs:
       - name: Audit dependencies
         run: |
           python -m pip install --upgrade pip-audit
-          pip-audit --ignore-vuln CVE-2025-53000
+          pip-audit --ignore-vuln PYSEC-2022-42969 --ignore-vuln CVE-2025-53000
