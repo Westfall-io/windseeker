@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      dev-dependencies:
+        patterns:
+          - "ruff*"
+          - "pytest*"
+          - "pre-commit*"
+          - "python-semantic-release*"
+          - "interrogate*"
+          - "coverage*"
+      runtime-dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "ruff*"
+          - "pytest*"
+          - "pre-commit*"
+          - "python-semantic-release*"
+          - "interrogate*"
+          - "coverage*"
