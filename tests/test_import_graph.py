@@ -1,4 +1,4 @@
-from windseeker.main import build_import_graph_from_package_text
+from windseeker.graph import build_import_graph_from_package_text
 
 
 def test_build_import_graph():

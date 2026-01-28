@@ -1,4 +1,4 @@
-from windseeker.main import extract_packages_with_text
+from windseeker.parsing import extract_top_level_packages_with_text
 
 
 def test_extract_simple_packages():
@@ -8,7 +8,7 @@ def test_extract_simple_packages():
     library package C;
     """
 
-    pkgs = dict(extract_packages_with_text(text))
+    pkgs = dict(extract_top_level_packages_with_text(text))
 
     assert set(pkgs.keys()) == {"A", "B", "C"}
     assert "package A;" in pkgs["A"]

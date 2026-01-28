@@ -1,7 +1,4 @@
-from windseeker.main import (
-    build_import_graph_from_package_text,
-    topological_packages,
-)
+from windseeker.graph import build_import_graph_from_package_text, topological_packages
 
 
 def test_topological_order_dependencies_first():
