@@ -48,6 +48,7 @@ show_missing = true
 skip_empty = true
 omit = [
   "tests/*",
+  "windseeker/**/__init__.py",
 ]
 
 [tool.coverage.xml]
