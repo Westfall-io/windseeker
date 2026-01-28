@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v0.3.0 (2026-01-28)
+
+### :robot:
+
+- :robot: Format fixes
+  ([`1ae5b44`](https://github.com/Westfall-io/windseeker/commit/1ae5b4459f37b8b4e26dade827f83146427ed4ad))
+
+### :sparkles:
+
+- :sparkles: add CLI controls for view-render failures and SVG render limits
+  ([`7eea110`](https://github.com/Westfall-io/windseeker/commit/7eea110062ecc73b680450ac86809ca9dde6891e))
+
+### Other
+
+- 🧪 test: fix test imports after refactor
+  ([`ba9bbe5`](https://github.com/Westfall-io/windseeker/commit/ba9bbe54022a3064f4cf5d8fe56589aecc1d9a48))
+
+
 ## v0.2.0 (2026-01-16)
 
 ### :memo:
