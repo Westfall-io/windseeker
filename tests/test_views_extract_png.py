@@ -9,8 +9,7 @@ from windseeker.views.extract import extract_view_images_from_executed_notebook
 
 # 1x1 PNG (transparent) base64
 _ONE_BY_ONE_PNG_B64 = (
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8"
-    "/w8AAn8B9p3eKQAAAABJRU5ErkJggg=="
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/w8AAn8B9p3eKQAAAABJRU5ErkJggg=="
 )
 
 
