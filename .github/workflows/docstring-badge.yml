@@ -38,8 +38,20 @@ jobs:
           cat interrogate.txt
 
           # Extract TOTAL percentage from interrogate table output
-          PCT=$(python -c 'import re; from pathlib import Path; text=Path("interrogate.txt").read_text(encoding="utf-8", errors="replace"); m=re.search(r"(?mi)^\\|\\s*TOTAL\\s*\\|.*?\\|\\s*([0-9]+(?:\\.[0-9]+)?)%\\s*\\|\\s*$", text) or re.search(r"(?i)actual:\\s*([0-9]+(?:\\.[0-9]+)?)%", text); print(m.group(1) if m else "0")')
+          PCT=$(python -c 'import re; from pathlib import Path
+          text = Path("interrogate.txt").read_text(encoding="utf-8", errors="replace")
+          # Normalize CRLF and strip ANSI escape codes
+          text = text.replace("\r\n", "\n").replace("\r", "\n")
+          text = re.sub(r"\x1b\[[0-9;]*m", "", text)
 
+          pct = "0"
+          for line in text.splitlines():
+              if "TOTAL" in line:
+                  m = re.findall(r"([0-9]+(?:\.[0-9]+)?)%", line)
+                  if m:
+                      pct = m[-1]
+                      break
+          print(pct)')
           echo "pct=$PCT" >> "$GITHUB_OUTPUT"
           echo "Docstring coverage = $PCT%"
 
