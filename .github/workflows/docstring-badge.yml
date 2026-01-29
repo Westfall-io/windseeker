@@ -38,10 +38,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          OUTPUT="$(interrogate -q windseeker || true)"
+          # Capture stdout+stderr, and don't fail the workflow just because interrogate returns nonzero
+          OUTPUT="$(interrogate -v windseeker 2>&1 || true)"
           echo "$OUTPUT"
 
-          PCT="$(echo "$OUTPUT" | python -c "import sys,re; t=sys.stdin.read(); m=re.search(r'(\d+(?:\.\d+)?)%', t); print(m.group(1) if m else '0')")"
+          # Parse the "Overall coverage" percentage (most stable across interrogate versions)
+          PCT="$(echo "$OUTPUT" | python -c "import sys,re; t=sys.stdin.read(); m=re.search(r'(?i)Overall coverage[^0-9]*([0-9]+(?:\.[0-9]+)?)%', t); print(m.group(1) if m else '0')")"
           echo "pct=$PCT" >> "$GITHUB_OUTPUT"
 
       - name: Write badge JSON
@@ -51,10 +53,30 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p badge
-          python -c "import json,os; pct=float(os.environ.get('PCT','0')); \
-          color=('brightgreen' if pct>=90 else 'green' if pct>=80 else 'yellowgreen' if pct>=70 else 'yellow' if pct>=60 else 'orange' if pct>=50 else 'red'); \
-          data={'schemaVersion':1,'label':'docstrings','message':f'{pct:.1f}%','color':color}; \
-          open('badge/docstring-coverage.json','w',encoding='utf-8').write(json.dumps(data))"
+          python - <<'PY'
+          import json, os
+          pct = float(os.environ.get("PCT", "0") or "0")
+
+          def color(p):
+              return (
+                  "brightgreen" if p >= 90 else
+                  "green"       if p >= 80 else
+                  "yellowgreen" if p >= 70 else
+                  "yellow"      if p >= 60 else
+                  "orange"      if p >= 50 else
+                  "red"
+              )
+
+          data = {
+              "schemaVersion": 1,
+              "label": "docstrings",
+              "message": f"{pct:.1f}%",
+              "color": color(pct),
+          }
+
+          with open("badge/docstring-coverage.json", "w", encoding="utf-8") as f:
+              json.dump(data, f)
+          PY
 
       - name: Deploy badge JSON to gh-pages
         uses: peaceiris/actions-gh-pages@v4

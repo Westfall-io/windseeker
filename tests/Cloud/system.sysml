@@ -33,6 +33,15 @@ package Riolu_Views {
     }
 
     view Riolu_Views2 {
+        expose Riolu_Definitions::Elastic;
+        expose Riolu_Definitions::Vue;
+        expose Riolu_Definitions::db_pull;
+        expose Riolu::e;
+        expose Riolu::vue_app;
+        render Views::asInterconnectionDiagram;
+    }
+
+    view Riolu_Views3 {
         expose Riolu_Definitions::**;
         render Views::asInterconnectionDiagram;
     }
