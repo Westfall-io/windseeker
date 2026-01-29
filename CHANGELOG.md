@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v0.3.1 (2026-01-29)
+
+### :bug:
+
+- :bug: Fix for docstring badge incorrect
+  ([`38dd5c8`](https://github.com/Westfall-io/windseeker/commit/38dd5c8d7b55996cc1600cd234a75364bf3d77a2))
+
+### :memo:
+
+- :memo: Adding to README documentation
+  ([`7f96a31`](https://github.com/Westfall-io/windseeker/commit/7f96a31c33ddb51ea3338757a14019b8920bbe32))
+
+- :memo: omit package __init__.py files from coverage metrics
+  ([`074621d`](https://github.com/Westfall-io/windseeker/commit/074621d6260e5d7bd24d82dba1f7fc93a5cad491))
+
+### Other
+
+- 🎨 fix: resolve ruff formatting errors
+  ([`0aba011`](https://github.com/Westfall-io/windseeker/commit/0aba01176855a5a7fca7b243c968823a266b2e90))
+
+
 ## v0.3.0 (2026-01-28)
 
 ### :robot:
