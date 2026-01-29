@@ -4,8 +4,8 @@
 ![SysML](https://img.shields.io/badge/SysML-v2-green.svg)
 ![CLI](https://img.shields.io/badge/CLI-windseeker-brightgreen.svg)
 ![Status](https://img.shields.io/badge/status-experimental-yellow.svg)
-![PyPI](https://img.shields.io/pypi/v/sysml-windseeker.svg)
-![Coverage](https://img.shields.io/codecov/c/github/Westfall-io/windseeker)
+[![PyPI](https://img.shields.io/pypi/v/sysml-windseeker.svg)](https://pypi.org/project/sysml-windseeker/)
+[![Coverage](https://img.shields.io/codecov/c/github/Westfall-io/windseeker)](https://codecov.io/gh/Westfall-io/windseeker)
 ![Docstrings](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Westfall-io/windseeker/gh-pages/docstring-coverage.json)
 ![Security Audit](https://github.com/Westfall-io/windseeker/actions/workflows/security-audit.yml/badge.svg)
 
@@ -24,6 +24,28 @@ It scans `.sysml` files, analyzes package dependencies, generates a dependency-o
 ## AI Assisted Development
 
 This project has used generative AI to assist in the development of the tool.
+
+---
+
+## 🧱 Architecture Overview
+
+```mermaid
+flowchart TD
+    A[.sysml Files] --> B[Folder Scanner]
+    B --> C[Package & Import Parser]
+    C --> D[Dependency Graph]
+    D --> E[Topological Ordering]
+
+    E --> F[SysML Concatenation]
+    E --> G[Jupyter Notebook Builder]
+
+    G --> H[Notebook Execution]
+    H --> I[View Rendering Cells]
+
+    I --> J[SVG / PNG / JPG Extraction]
+
+    D --> K[Graph Visualization]
+```
 
 ---
 
@@ -54,6 +76,7 @@ This project has used generative AI to assist in the development of the tool.
 - Detects errors via:
   - Jupyter `error` outputs
   - SysML kernel `stderr` (`ERROR`, `Exception`, `Traceback`)
+- View rendering failures are **non-fatal by default**
 
 ### View Image Extraction
 - Extracts rendered views from executed notebooks
@@ -69,15 +92,11 @@ This project has used generative AI to assist in the development of the tool.
 
 ### 1) Install Windseeker
 
-Install from PyPI:
-
 ```bash
 pip install sysml-windseeker
 ```
 
-This installs the `windseeker` CLI command.
-
-For development or local use:
+For development:
 
 ```bash
 pip install -e .
@@ -86,10 +105,6 @@ pip install -e .
 ---
 
 ### 2) Ensure a SysML Jupyter Kernel Is Installed
-
-Windseeker **requires a SysML kernel registered with Jupyter**.
-
-Verify:
 
 ```bash
 jupyter kernelspec list
@@ -101,51 +116,60 @@ You must see a kernel such as:
 sysml
 ```
 
-> Kernel installation is tool-specific and cannot be handled via `requirements.txt` or `pyproject.toml`.
-
 ---
 
-### 3) Minimal Example Model
+### 3) Run Windseeker
 
-Create `tests/simple.sysml`:
-
-```sysml
-package DemoSystem {
-
-  port def DbPort {
-    in item query  : String;
-    out item result : String;
-  }
-
-  part def UI {
-    out port db : DbPort;
-  }
-
-  part def ElasticDB {
-    in port api : ~DbPort;
-  }
-
-  part def System {
-    part ui : UI;
-    part db : ElasticDB;
-    connect ui.db to db.api;
-  }
-
-  package Views {
-    view uiDbConnection {
-      expose DemoSystem::System::ui;
-      expose DemoSystem::System::db;
-    }
-  }
-}
+```bash
+windseeker run --folder ./tests
 ```
 
 ---
 
-### 4) Run Windseeker
+## 🧰 CLI Usage
+
+### Common Options
+
+| Flag | Description |
+|-----|------------|
+| `--folder PATH` | Root directory to scan for `.sysml` files |
+| `--graph / --no-graph` | Enable or disable dependency graph image generation |
+| `--execute / --no-execute` | Execute the generated notebook |
+| `--export-views / --no-export-views` | Extract rendered views |
+| `--views-dir PATH` | Output directory for view images |
+| `--sysml-out PATH` | Output `.sysml` file |
+| `--notebook-out PATH` | Output notebook path |
+
+---
+
+### Validation & Safety Flags
+
+| Flag | Description |
+|-----|------------|
+| `--ignore-missing NAME` | Ignore unresolved imports (e.g. standard libraries) |
+| `--strict-missing / --allow-missing` | Fail if unresolved imports are found |
+| `--strict-views / --allow-view-errors` | Fail if `%view` cells error |
+| `--execute / --no-execute` | Skip notebook execution |
+
+---
+
+### View Rendering Options
+
+| Flag | Description |
+|-----|------------|
+| `--write-svg / --no-write-svg` | Write SVG files |
+| `--write-png / --no-write-png` | Write PNG files |
+| `--write-jpg / --no-write-jpg` | Also write JPG files |
+| `--png-transparent / --png-opaque` | Control PNG transparency |
+| `--png-bg COLOR` | Background color for opaque PNGs |
+
+---
+
+### Full CLI Reference
 
 ```bash
-windseeker run
+windseeker run --help
+windseeker order --help
 ```
 
 ---
