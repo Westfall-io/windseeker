@@ -13,6 +13,9 @@
 
 It scans `.sysml` files, analyzes package dependencies, generates a dependency-ordered SysML Jupyter notebook, executes that notebook using a SysML kernel, and extracts rendered **views** as images.
 
+## Why would you use this?
+It allows you to develop SysMLv2 models using SysIDE-like environments where models are split over multiple files and still generate graphical views via PlantUML from the Jupyter SysML reference implementation kernel **without** constant refactors.
+
 > **Naming note**
 >
 > - **PyPI distribution name:** `sysml-windseeker`
