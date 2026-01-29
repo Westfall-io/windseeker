@@ -1,91 +1,102 @@
-name: docstring-badge
+name: Docstring Coverage Badge
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  badge:
+  docstring-badge:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: pip
 
-      - name: Install
+      - name: Install interrogate
+        shell: bash
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          python -m pip install interrogate
 
-      - name: Compute docstring coverage (interrogate)
-        id: coverage
+      - name: Run interrogate and extract coverage
+        id: interrogate
         shell: bash
         run: |
           set -euo pipefail
 
-          # Capture stdout+stderr, and don't fail the workflow just because interrogate returns nonzero
-          OUTPUT="$(interrogate -v windseeker 2>&1 || true)"
-          echo "$OUTPUT"
+          # Run interrogate but never fail the workflow
+          interrogate -v windseeker > interrogate.txt 2>&1 || true
+          cat interrogate.txt
 
-          # Parse the "Overall coverage" percentage (most stable across interrogate versions)
-          PCT="$(echo "$OUTPUT" | python -c "import sys,re; t=sys.stdin.read(); m=re.search(r'(?i)Overall coverage[^0-9]*([0-9]+(?:\.[0-9]+)?)%', t); print(m.group(1) if m else '0')")"
+          # Extract TOTAL percentage from interrogate table output
+          PCT=$(python -c 'import re; from pathlib import Path; text=Path("interrogate.txt").read_text(encoding="utf-8", errors="replace"); m=re.search(r"(?mi)^\\|\\s*TOTAL\\s*\\|.*?\\|\\s*([0-9]+(?:\\.[0-9]+)?)%\\s*\\|\\s*$", text) or re.search(r"(?i)actual:\\s*([0-9]+(?:\\.[0-9]+)?)%", text); print(m.group(1) if m else "0")')
 
           echo "pct=$PCT" >> "$GITHUB_OUTPUT"
-          echo "Parsed pct=$PCT"
+          echo "Docstring coverage = $PCT%"
 
-      - name: Build Shields.io endpoint JSON
+      - name: Write badge JSON
         shell: bash
-        env:
-          PCT: ${{ steps.coverage.outputs.pct }}
         run: |
           set -euo pipefail
-          mkdir -p badge
+          mkdir -p .github/badges
 
+          PCT="${{ steps.interrogate.outputs.pct }}"
+          # Choose a simple color thresholding scheme
           python - <<'PY'
           import json, os
-          pct = float(os.environ.get("PCT", "0") or "0")
+          pct_str = os.environ.get("PCT", "0")
+          try:
+            pct = float(pct_str)
+          except ValueError:
+            pct = 0.0
 
-          def color(p):
-              return (
-                  "brightgreen" if p >= 90 else
-                  "green"       if p >= 80 else
-                  "yellowgreen" if p >= 70 else
-                  "yellow"      if p >= 60 else
-                  "orange"      if p >= 50 else
-                  "red"
-              )
+          if pct >= 90:
+            color = "brightgreen"
+          elif pct >= 80:
+            color = "green"
+          elif pct >= 70:
+            color = "yellowgreen"
+          elif pct >= 60:
+            color = "yellow"
+          else:
+            color = "orange"
 
           data = {
-              "schemaVersion": 1,
-              "label": "docstrings",
-              "message": f"{pct:.1f}%",
-              "color": color(pct),
+            "schemaVersion": 1,
+            "label": "docstrings",
+            "message": f"{pct_str}%",
+            "color": color,
           }
 
-          with open("badge/docstring-coverage.json", "w", encoding="utf-8") as f:
-              json.dump(data, f)
+          with open(".github/badges/docstrings.json", "w", encoding="utf-8") as f:
+            json.dump(data, f)
+            f.write("\n")
           PY
+        env:
+          PCT: ${{ steps.interrogate.outputs.pct }}
 
-          # Ensure a dotfile exists so peaceiris doesn't log cp errors for badge/.*
-          touch badge/.nojekyll
-          touch badge/.keep
+      - name: Commit badge if changed
+        shell: bash
+        run: |
+          set -euo pipefail
 
-      - name: Publish badge to gh-pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: badge
-          destination_dir: .
-          keep_files: true
-          enable_jekyll: false
+          if git diff --quiet -- .github/badges/docstrings.json; then
+            echo "No badge changes."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add .github/badges/docstrings.json
+          git commit -m "chore: update docstring coverage badge"
+          git push
